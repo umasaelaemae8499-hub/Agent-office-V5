@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Affiliate Dashboard — Japan Travel Website</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛩️</text></svg>" />
+  <link rel="stylesheet" href="css/affiliate.css" />
+</head>
+<body>
+  <header class="site">
+    <h1>⛩️ Affiliate Dashboard</h1>
+    <p>Japan Travel Website — partner programs, link generator and click tracking</p>
+  </header>
+
+  <main>
+    <nav class="crumbs">
+      <a href="demo.html">→ Open the demo article page to generate clicks</a>
+    </nav>
+
+    <section>
+      <h2>Overview</h2>
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="label">Total clicks</div>
+          <div class="value" id="stat-clicks">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Clicks (last 7 days)</div>
+          <div class="value" id="stat-week">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Active partners</div>
+          <div class="value" id="stat-partners">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Est. revenue</div>
+          <div class="value" id="stat-revenue">¥0</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Link generator</h2>
+      <p>Paste a partner product URL to get the tagged affiliate version.</p>
+      <form id="link-generator">
+        <input
+          type="url"
+          name="url"
+          placeholder="https://www.klook.com/activity/..."
+          required
+        />
+        <button type="submit">Generate</button>
+      </form>
+      <code id="generated-link"></code>
+    </section>
+
+    <section>
+      <h2>Partners</h2>
+      <table id="partner-table">
+        <thead>
+          <tr>
+            <th>Partner</th>
+            <th>Category</th>
+            <th>Affiliate ID</th>
+            <th>Commission</th>
+            <th>Clicks</th>
+            <th>Est. revenue</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Recent clicks</h2>
+      <div class="toolbar">
+        <button class="secondary" id="clear-data">Clear recorded clicks</button>
+      </div>
+      <table id="clicks-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Partner</th>
+            <th>Page</th>
+            <th>Referral code</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="js/partners.js"></script>
+  <script src="js/affiliate-tracker.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
