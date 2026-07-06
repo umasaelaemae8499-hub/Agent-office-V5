@@ -6,9 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Japan Term">
+<meta name="apple-mobile-web-app-title" content="JapanOS">
 <meta name="theme-color" content="#0d1117">
-<title>Japan Travel Terminal</title>
+<title>JapanOS Terminal</title>
 <style>
   :root {
     --bg: #0d1117;
@@ -20,537 +20,1106 @@
     --red: #f85149;
     --magenta: #d2a8ff;
     --dim: #8b949e;
-    --accent: #ff6b81;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body {
-    height: 100%;
-    overscroll-behavior: none;
-    background: var(--bg);
-  }
+  html, body { height: 100%; overscroll-behavior: none; background: var(--bg); }
   body {
     font-family: "SF Mono", ui-monospace, Menlo, Monaco, "Cascadia Mono", monospace;
     color: var(--fg);
     display: flex;
     flex-direction: column;
-    /* Fill the visual viewport; safe areas for the notch and home indicator */
     height: 100dvh;
     padding-top: env(safe-area-inset-top);
   }
   #titlebar {
     flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    display: flex; align-items: center; gap: 8px;
     padding: 10px 14px;
     background: var(--panel);
     border-bottom: 1px solid #21262d;
-    user-select: none;
-    -webkit-user-select: none;
+    user-select: none; -webkit-user-select: none;
   }
   .dot { width: 12px; height: 12px; border-radius: 50%; }
   .dot.r { background: #ff5f57; } .dot.y { background: #febc2e; } .dot.g { background: #28c840; }
   #titlebar .title {
-    flex: 1;
-    text-align: center;
-    font-size: 13px;
-    color: var(--dim);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    flex: 1; text-align: center; font-size: 13px; color: var(--dim);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   #screen {
     flex: 1 1 auto;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 12px 14px 8px;
-    font-size: 14px;
-    line-height: 1.55;
+    padding: 10px 12px 8px;
+    font-size: 13px;
+    line-height: 1.5;
     word-break: break-word;
   }
   #screen .line { white-space: pre-wrap; }
-  .green { color: var(--green); }
-  .cyan { color: var(--cyan); }
-  .yellow { color: var(--yellow); }
-  .red { color: var(--red); }
-  .magenta { color: var(--magenta); }
-  .dim { color: var(--dim); }
-  .accent { color: var(--accent); }
-  a { color: var(--cyan); }
-  #inputbar {
+  .green { color: var(--green); } .cyan { color: var(--cyan); }
+  .yellow { color: var(--yellow); } .red { color: var(--red); }
+  .magenta { color: var(--magenta); } .dim { color: var(--dim); }
+  #keybar {
     flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    padding-bottom: calc(10px + env(safe-area-inset-bottom));
-    background: var(--panel);
-    border-top: 1px solid #21262d;
-  }
-  #prompt { color: var(--green); font-size: 15px; white-space: nowrap; }
-  #cmd {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--fg);
-    font-family: inherit;
-    /* 16px minimum stops iOS Safari from zooming in when the field is focused */
-    font-size: 16px;
-    caret-color: var(--green);
-  }
-  #cmd::placeholder { color: #484f58; }
-  #enter {
-    background: #21262d;
-    color: var(--green);
-    border: 1px solid #30363d;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 14px;
-    padding: 8px 14px;
-    touch-action: manipulation;
-  }
-  #enter:active { background: #30363d; }
-  #quickbar {
-    flex: 0 0 auto;
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 8px 14px;
+    display: flex; gap: 6px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    padding: 8px 12px;
     background: var(--bg);
     border-top: 1px solid #21262d;
     scrollbar-width: none;
   }
-  #quickbar::-webkit-scrollbar { display: none; }
-  #quickbar button {
+  #keybar::-webkit-scrollbar { display: none; }
+  #keybar button {
     flex: 0 0 auto;
-    background: #161b22;
-    color: var(--cyan);
-    border: 1px solid #30363d;
-    border-radius: 14px;
-    font-family: inherit;
-    font-size: 13px;
-    padding: 6px 12px;
+    background: #161b22; color: var(--cyan);
+    border: 1px solid #30363d; border-radius: 8px;
+    font-family: inherit; font-size: 13px;
+    padding: 7px 12px;
     touch-action: manipulation;
   }
-  #quickbar button:active { background: #21262d; }
-  .cursor {
-    display: inline-block;
-    width: 8px; height: 15px;
-    background: var(--green);
-    vertical-align: text-bottom;
-    animation: blink 1s steps(1) infinite;
+  #keybar button:active { background: #21262d; }
+  #inputbar {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    background: var(--panel);
+    border-top: 1px solid #21262d;
   }
-  @keyframes blink { 50% { opacity: 0; } }
+  #prompt { color: var(--green); font-size: 13px; white-space: nowrap; }
+  #cmd {
+    flex: 1;
+    background: transparent; border: none; outline: none;
+    color: var(--fg); font-family: inherit;
+    font-size: 16px; /* stops iOS Safari zoom on focus */
+    caret-color: var(--green);
+  }
+  #cmd::placeholder { color: #484f58; }
+  #enter {
+    background: #21262d; color: var(--green);
+    border: 1px solid #30363d; border-radius: 8px;
+    font-family: inherit; font-size: 14px; padding: 8px 14px;
+    touch-action: manipulation;
+  }
+  #enter:active { background: #30363d; }
+  /* full-screen text editor overlay */
+  #editor {
+    position: fixed; inset: 0;
+    display: none; flex-direction: column;
+    background: var(--bg);
+    padding-top: env(safe-area-inset-top);
+    z-index: 10;
+  }
+  #editor.open { display: flex; }
+  #editor header {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    background: var(--panel); border-bottom: 1px solid #21262d;
+    font-size: 13px;
+  }
+  #editor header .fname { flex: 1; color: var(--yellow); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #editor header button {
+    background: #21262d; border: 1px solid #30363d; border-radius: 8px;
+    font-family: inherit; font-size: 13px; padding: 7px 14px;
+    touch-action: manipulation;
+  }
+  #editor header .save { color: var(--green); }
+  #editor header .cancel { color: var(--red); }
+  #edtext {
+    flex: 1;
+    background: var(--bg); color: var(--fg);
+    border: none; outline: none; resize: none;
+    font-family: inherit; font-size: 16px; line-height: 1.5;
+    padding: 12px 14px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    -webkit-overflow-scrolling: touch;
+  }
 </style>
 </head>
 <body>
 
 <div id="titlebar">
   <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-  <span class="title">traveler@japan — にほん — 80×24</span>
+  <span class="title">jsh — traveler@japan — tty1</span>
 </div>
 
 <div id="screen" aria-live="polite"></div>
 
-<div id="quickbar">
-  <button data-cmd="help">help</button>
-  <button data-cmd="destinations">destinations</button>
-  <button data-cmd="itinerary">itinerary</button>
-  <button data-cmd="food">food</button>
-  <button data-cmd="phrases">phrases</button>
-  <button data-cmd="tips">tips</button>
-  <button data-cmd="seasons">seasons</button>
-  <button data-cmd="budget">budget</button>
-  <button data-cmd="clear">clear</button>
+<div id="keybar">
+  <button data-key="tab">⇥ tab</button>
+  <button data-key="up">↑</button>
+  <button data-key="down">↓</button>
+  <button data-ins="|">|</button>
+  <button data-ins="&gt;">&gt;</button>
+  <button data-ins="~">~</button>
+  <button data-ins="/">/</button>
+  <button data-ins="-">-</button>
+  <button data-ins=".">.</button>
+  <button data-key="ctrlc">^C</button>
+  <button data-run="help">help</button>
+  <button data-run="ls">ls</button>
+  <button data-run="clear">clear</button>
 </div>
 
 <div id="inputbar">
-  <span id="prompt">traveler@japan:~$</span>
+  <span id="prompt"></span>
   <input id="cmd" type="text" autocomplete="off" autocorrect="off" autocapitalize="off"
-         spellcheck="false" enterkeyhint="go" placeholder="type help">
+         spellcheck="false" enterkeyhint="go" placeholder="">
   <button id="enter" aria-label="run command">⏎</button>
+</div>
+
+<div id="editor">
+  <header>
+    <span class="fname"></span>
+    <button class="cancel">cancel</button>
+    <button class="save">save</button>
+  </header>
+  <textarea id="edtext" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
 </div>
 
 <script>
 (function () {
   "use strict";
 
-  var screen = document.getElementById("screen");
-  var input  = document.getElementById("cmd");
-  var enter  = document.getElementById("enter");
-  var history = [];
-  var histIdx = -1;
+  var USER = "traveler", HOST = "japan";
+  var FS_KEY = "japanos_fs_v1", HIST_KEY = "japanos_hist_v1";
+  var BOOT_TIME = Date.now();
 
-  var BANNER = [
-    ["accent", " ⛩  JAPAN TRAVEL TERMINAL  ⛩"],
-    ["dim",    " ────────────────────────────────"],
-    ["fg",     " ようこそ! Welcome aboard, traveler."],
-    ["fg",     " Explore Japan from the command line."],
-    ["dim",    " ────────────────────────────────"],
-    ["green",  " Type 'help' or tap a chip below."],
-    ["fg",     ""]
-  ];
+  var screenEl = document.getElementById("screen");
+  var input = document.getElementById("cmd");
+  var promptEl = document.getElementById("prompt");
 
-  function el(cls, text) {
-    var d = document.createElement("div");
-    d.className = "line" + (cls && cls !== "fg" ? " " + cls : "");
-    d.textContent = text;
-    return d;
+  /* ---------- guide content ---------- */
+
+  var GUIDES = {
+    "destinations.txt": [
+      "DESTINATIONS",
+      "============",
+      "",
+      "Tokyo (東京)     Shibuya Crossing, Senso-ji,",
+      "                Akihabara, teamLab, Tsukiji.",
+      "Kyoto (京都)     Fushimi Inari, Kinkaku-ji,",
+      "                Arashiyama bamboo grove, Gion.",
+      "Osaka (大阪)     Dotonbori neon, Osaka Castle,",
+      "                street food capital.",
+      "Nara (奈良)      Bowing deer, Todai-ji Buddha.",
+      "Hakone (箱根)    Onsen, ryokan, Mt. Fuji views.",
+      "Hiroshima (広島) Peace Memorial, Miyajima torii.",
+      "Sapporo (札幌)   Snow festival, miso ramen.",
+      "Okinawa (沖縄)   Beaches, reefs, Ryukyu culture."
+    ].join("\n"),
+
+    "itinerary.txt": [
+      "7-DAY GOLDEN ROUTE",
+      "==================",
+      "",
+      "Day 1-3  Tokyo",
+      "  Arrive HND/NRT. Shibuya & Shinjuku,",
+      "  Asakusa + Senso-ji, Akihabara.",
+      "  Day trip option: Nikko or Kamakura.",
+      "Day 4    Hakone",
+      "  Onsen ryokan night, Fuji views from",
+      "  the Lake Ashi ropeway.",
+      "Day 5-6  Kyoto",
+      "  Fushimi Inari at dawn, Kiyomizu-dera,",
+      "  Arashiyama, evening in Gion.",
+      "Day 7    Osaka",
+      "  Osaka Castle, Dotonbori food crawl,",
+      "  fly out of KIX.",
+      "",
+      "tip: activate your JR Pass on Day 4."
+    ].join("\n"),
+
+    "food.txt": [
+      "EAT YOUR WAY THROUGH JAPAN",
+      "==========================",
+      "",
+      "ramen        tonkotsu in Fukuoka, miso in Sapporo",
+      "sushi        standing sushi bars, Toyosu market",
+      "okonomiyaki  Osaka vs Hiroshima style - try both",
+      "takoyaki     molten octopus balls, Dotonbori",
+      "kaiseki      multi-course art, best in Kyoto",
+      "onigiri      konbini onigiri are elite. Trust.",
+      "wagyu        Kobe, Matsusaka, or Omi beef",
+      "",
+      "pro-tip: say 'oishii!' (delicious) often."
+    ].join("\n"),
+
+    "phrases.txt": [
+      "SURVIVAL JAPANESE",
+      "=================",
+      "",
+      "Konnichiwa              hello",
+      "Arigatou gozaimasu      thank you",
+      "Sumimasen               excuse me / sorry",
+      "Onegaishimasu           please",
+      "Eigo wa hanasemasu ka?  do you speak English?",
+      "Ikura desu ka?          how much is it?",
+      "Oishii!                 delicious!",
+      "Kanpai!                 cheers!",
+      "Toire wa doko?          where's the toilet?",
+      "",
+      "a little Japanese goes a very long way."
+    ].join("\n"),
+
+    "tips.txt": [
+      "TRAVEL TIPS",
+      "===========",
+      "",
+      "* Suica/PASMO in Apple Wallet works on",
+      "  trains, buses and konbini.",
+      "* Cash still matters; 7-Eleven ATMs",
+      "  take foreign cards.",
+      "* Rent pocket WiFi or grab an eSIM.",
+      "* Trash cans are rare - carry a bag.",
+      "* Escalators: stand left in Tokyo,",
+      "  right in Osaka.",
+      "* No tipping. Ever.",
+      "* Book Ghibli/teamLab/Shibuya Sky",
+      "  weeks ahead.",
+      "* Konbini food is genuinely great."
+    ].join("\n"),
+
+    "seasons.txt": [
+      "WHEN TO VISIT",
+      "=============",
+      "",
+      "Spring (Mar-May)  cherry blossoms;",
+      "                  peak late Mar-early Apr",
+      "Summer (Jun-Aug)  hot & humid; festivals",
+      "                  and fireworks",
+      "Autumn (Sep-Nov)  crisp air, red maples,",
+      "                  best hiking",
+      "Winter (Dec-Feb)  powder snow in Hokkaido,",
+      "                  quiet temples, onsen"
+    ].join("\n"),
+
+    "budget.txt": [
+      "DAILY BUDGET (per person)",
+      "=========================",
+      "",
+      "Shoestring   Y8,000-12,000  (~$55-80)",
+      "             hostels, konbini, local trains",
+      "Comfortable  Y15,000-25,000 (~$100-170)",
+      "             business hotels, izakaya",
+      "Splurge      Y40,000+       (~$270+)",
+      "             ryokan with kaiseki",
+      "",
+      "JR Pass (7-day): Y50,000 - worth it for",
+      "Tokyo->Kyoto->Hiroshima round trips."
+    ].join("\n"),
+
+    "transport.txt": [
+      "GETTING AROUND",
+      "==============",
+      "",
+      "Shinkansen  Tokyo->Kyoto in 2h15m.",
+      "            Reserve on the smartEX app.",
+      "IC cards    Suica / PASMO / ICOCA -",
+      "            tap onto anything that moves.",
+      "Metro       Google Maps transit is great.",
+      "Taxis       doors open themselves.",
+      "            Don't touch them!"
+    ].join("\n")
+  };
+
+  /* ---------- virtual filesystem ----------
+     dir:  { d:1, c:{ name: node } }
+     file: { f:1, x:"content" }               */
+
+  function dir(children) { return { d: 1, c: children || {} }; }
+  function file(content) { return { f: 1, x: content || "" }; }
+
+  function factoryFS() {
+    var guides = {};
+    for (var k in GUIDES) guides[k] = file(GUIDES[k]);
+    var binNames = Object.keys(COMMANDS).sort();
+    var bin = {};
+    for (var i = 0; i < binNames.length; i++) bin[binNames[i]] = file("#!jsh builtin\n");
+    return dir({
+      "etc": dir({ "motd": file("Welcome to JapanOS - enjoy your trip!\n") }),
+      "bin": dir(bin),
+      "tmp": dir({}),
+      "home": dir({
+        "traveler": dir({
+          "README.txt": file([
+            "Welcome home, traveler.",
+            "",
+            "Your Japan guides live in ~/guides:",
+            "  ls guides",
+            "  cat guides/food.txt",
+            "",
+            "This is a real (virtual) filesystem.",
+            "Files you create are saved on this",
+            "device and survive closing the app.",
+            "Try:",
+            "  mkdir plans",
+            "  echo 'book teamLab' > plans/todo.txt",
+            "  cat plans/todo.txt",
+            "",
+            "Type 'help' for all commands.",
+            "Type 'reset' to restore factory files."
+          ].join("\n")),
+          "guides": dir(guides),
+          "notes": dir({
+            "packing.txt": file("passport\nJR pass voucher\ncomfortable shoes\nportable battery\ncoin purse (yen!)\n")
+          })
+        })
+      })
+    });
   }
 
-  function print(lines) {
-    for (var i = 0; i < lines.length; i++) {
-      screen.appendChild(el(lines[i][0], lines[i][1]));
+  var root, cwd; // cwd is array of path parts, e.g. ["home","traveler"]
+
+  function saveFS() {
+    try { localStorage.setItem(FS_KEY, JSON.stringify(root)); } catch (e) {}
+  }
+  function loadFS() {
+    try {
+      var raw = localStorage.getItem(FS_KEY);
+      if (raw) { var r = JSON.parse(raw); if (r && r.d) return r; }
+    } catch (e) {}
+    return null;
+  }
+
+  /* ---------- path helpers ---------- */
+
+  function normalize(pathStr) {
+    // returns array of parts, or null if invalid; handles ~, ., ..
+    var parts;
+    if (pathStr === "~" || pathStr.slice(0, 2) === "~/") {
+      parts = ["home", USER].concat(pathStr.slice(2).split("/"));
+    } else if (pathStr.charAt(0) === "/") {
+      parts = pathStr.split("/");
+    } else {
+      parts = cwd.concat(pathStr.split("/"));
     }
-    screen.scrollTop = screen.scrollHeight;
+    var out = [];
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i];
+      if (p === "" || p === ".") continue;
+      if (p === "..") { if (out.length) out.pop(); continue; }
+      out.push(p);
+    }
+    return out;
   }
+
+  function nodeAt(parts) {
+    var n = root;
+    for (var i = 0; i < parts.length; i++) {
+      if (!n.d || !n.c[parts[i]]) return null;
+      n = n.c[parts[i]];
+    }
+    return n;
+  }
+
+  function pathStr(parts) { return "/" + parts.join("/"); }
+
+  function promptPath() {
+    var p = pathStr(cwd);
+    var home = "/home/" + USER;
+    if (p === home) return "~";
+    if (p.indexOf(home + "/") === 0) return "~" + p.slice(home.length);
+    return p;
+  }
+
+  function ShellError(msg) { this.msg = msg; }
+
+  function resolveParent(pathArg, what) {
+    // returns { parent, name } ; parent must exist and be a dir
+    var parts = normalize(pathArg);
+    if (!parts.length) throw new ShellError(what + ": invalid path");
+    var name = parts[parts.length - 1];
+    var parent = nodeAt(parts.slice(0, -1));
+    if (!parent || !parent.d) throw new ShellError(what + ": " + pathArg + ": no such directory");
+    return { parent: parent, name: name, parts: parts };
+  }
+
+  /* ---------- screen output ---------- */
+
+  function printLine(cls, text) {
+    var d = document.createElement("div");
+    d.className = "line" + (cls ? " " + cls : "");
+    d.textContent = text.length ? text : " ";
+    screenEl.appendChild(d);
+  }
+  function printBlock(cls, text) {
+    var lines = text.split("\n");
+    if (lines.length && lines[lines.length - 1] === "") lines.pop();
+    for (var i = 0; i < lines.length; i++) printLine(cls, lines[i]);
+  }
+  function scrollDown() { screenEl.scrollTop = screenEl.scrollHeight; }
+
+  function promptText() { return USER + "@" + HOST + ":" + promptPath() + "$"; }
 
   function echoCmd(raw) {
     var d = document.createElement("div");
     d.className = "line";
     var p = document.createElement("span");
     p.className = "green";
-    p.textContent = "traveler@japan:~$ ";
+    p.textContent = promptText() + " ";
     d.appendChild(p);
     d.appendChild(document.createTextNode(raw));
-    screen.appendChild(d);
+    screenEl.appendChild(d);
   }
 
-  var commands = {
+  function refreshPrompt() { promptEl.textContent = promptText(); }
+
+  /* ---------- tokenizer ---------- */
+
+  var OP = String.fromCharCode(1); // marks unquoted shell operators
+
+  function tokenize(s) {
+    var toks = [], cur = "", q = null, has = false;
+    function push() { if (has) { toks.push(cur); cur = ""; has = false; } }
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charAt(i);
+      if (q) {
+        if (c === q) q = null; else cur += c;
+        continue;
+      }
+      if (c === "'" || c === '"') { q = c; has = true; continue; }
+      if (c === " " || c === "\t") { push(); continue; }
+      if (c === "|") { push(); toks.push(OP + "|"); continue; }
+      if (c === ">") {
+        push();
+        if (s.charAt(i + 1) === ">") { toks.push(OP + ">>"); i++; }
+        else toks.push(OP + ">");
+        continue;
+      }
+      cur += c; has = true;
+    }
+    if (q) throw new ShellError("jsh: unterminated quote");
+    push();
+    return toks;
+  }
+
+  /* ---------- commands ---------- */
+
+  var HELP = {
+    help: "help            list commands",
+    man: "man CMD         describe one command",
+    ls: "ls [-a] [DIR]   list directory",
+    cd: "cd [DIR]        change directory",
+    pwd: "pwd             print working directory",
+    cat: "cat FILE...     print file contents",
+    echo: "echo TEXT       print text (supports > file)",
+    grep: "grep [-i] PAT   search text (file or pipe)",
+    head: "head [-n N] F   first lines of a file",
+    tail: "tail [-n N] F   last lines of a file",
+    wc: "wc [FILE]       count lines/words/chars",
+    tree: "tree [DIR]      directory tree",
+    mkdir: "mkdir [-p] DIR  create directory",
+    touch: "touch FILE      create empty file",
+    rm: "rm [-r] PATH    remove file (or dir with -r)",
+    rmdir: "rmdir DIR       remove empty directory",
+    mv: "mv SRC DST      move / rename",
+    cp: "cp [-r] SRC DST copy",
+    edit: "edit FILE       open text editor (also: nano, vi)",
+    history: "history         show command history",
+    clear: "clear           wipe the screen",
+    date: "date            current date & time",
+    whoami: "whoami          print user name",
+    hostname: "hostname        print host name",
+    uname: "uname [-a]      system info",
+    neofetch: "neofetch        system summary",
+    fortune: "fortune         draw an omikuji",
+    cowsay: "cowsay TEXT     a cow says things",
+    sudo: "sudo            nice try",
+    exit: "exit            log out (sort of)",
+    reboot: "reboot          reload the terminal",
+    reset: "reset           factory-reset the filesystem"
+  };
+
+  function getFile(pathArg, cmd) {
+    var n = nodeAt(normalize(pathArg));
+    if (!n) throw new ShellError(cmd + ": " + pathArg + ": No such file or directory");
+    if (n.d) throw new ShellError(cmd + ": " + pathArg + ": Is a directory");
+    return n;
+  }
+
+  function requireStdinOrFiles(args, stdin, cmd) {
+    if (args.length) {
+      var out = [];
+      for (var i = 0; i < args.length; i++) out.push(getFile(args[i], cmd).x);
+      return out.join("");
+    }
+    if (stdin !== "") return stdin;
+    throw new ShellError(cmd + ": missing file operand (or pipe input)");
+  }
+
+  var COMMANDS = {
     help: function () {
-      print([
-        ["yellow", "── AVAILABLE COMMANDS ───────────────────"],
-        ["fg", ""],
-        ["cyan", "  destinations   where to go"],
-        ["cyan", "  itinerary      a classic 7-day route"],
-        ["cyan", "  food           what to eat"],
-        ["cyan", "  phrases        essential Japanese"],
-        ["cyan", "  tips           travel know-how"],
-        ["cyan", "  seasons        when to visit"],
-        ["cyan", "  budget         daily cost guide"],
-        ["cyan", "  transport      getting around"],
-        ["cyan", "  fortune        omikuji — draw your luck"],
-        ["cyan", "  banner         reprint the welcome"],
-        ["cyan", "  date           current date & time"],
-        ["cyan", "  whoami         who are you?"],
-        ["cyan", "  echo <text>    repeat after you"],
-        ["cyan", "  clear          wipe the screen"],
-        ["fg", ""]
-      ]);
+      var names = Object.keys(HELP);
+      var out = ["jsh - JapanOS shell. Commands:", ""];
+      for (var i = 0; i < names.length; i++) out.push("  " + HELP[names[i]]);
+      out.push("");
+      out.push("Pipes and redirection work:");
+      out.push("  cat guides/food.txt | grep ramen");
+      out.push("  echo hello > notes/hi.txt");
+      out.push("Tab completes commands and paths.");
+      return out.join("\n");
     },
 
-    destinations: function () {
-      print([
-        ["yellow", "── DESTINATIONS ─────────────────────────"],
-        ["fg", ""],
-        ["magenta", "  Tokyo      東京"],
-        ["fg", "    Shibuya Crossing, Senso-ji, Akihabara,"],
-        ["fg", "    teamLab, Tsukiji outer market."],
-        ["fg", ""],
-        ["magenta", "  Kyoto      京都"],
-        ["fg", "    Fushimi Inari's 10,000 torii gates,"],
-        ["fg", "    Kinkaku-ji, Arashiyama bamboo grove, Gion."],
-        ["fg", ""],
-        ["magenta", "  Osaka      大阪"],
-        ["fg", "    Dotonbori neon, Osaka Castle, street food"],
-        ["fg", "    capital of Japan (kuidaore!)."],
-        ["fg", ""],
-        ["magenta", "  Nara       奈良"],
-        ["fg", "    Bowing deer, Todai-ji Great Buddha."],
-        ["fg", ""],
-        ["magenta", "  Hakone     箱根"],
-        ["fg", "    Onsen, ryokan stays, Mt. Fuji views."],
-        ["fg", ""],
-        ["magenta", "  Hiroshima  広島"],
-        ["fg", "    Peace Memorial, Miyajima floating torii."],
-        ["fg", ""],
-        ["magenta", "  Sapporo    札幌"],
-        ["fg", "    Snow festival, powder skiing, miso ramen."],
-        ["fg", ""],
-        ["magenta", "  Okinawa    沖縄"],
-        ["fg", "    Beaches, coral reefs, Ryukyu culture."],
-        ["fg", ""]
-      ]);
+    man: function (args) {
+      if (!args.length) throw new ShellError("man: which command?");
+      var h = HELP[args[0]];
+      if (!h) throw new ShellError("man: no manual entry for " + args[0]);
+      return h;
     },
 
-    itinerary: function () {
-      print([
-        ["yellow", "── 7-DAY GOLDEN ROUTE ───────────────────"],
-        ["fg", ""],
-        ["green", "  Day 1-3  Tokyo"],
-        ["fg", "    Arrive HND/NRT → Shibuya & Shinjuku,"],
-        ["fg", "    Asakusa + Senso-ji, Akihabara, day trip"],
-        ["fg", "    option: Nikko or Kamakura."],
-        ["fg", ""],
-        ["green", "  Day 4    Hakone"],
-        ["fg", "    Onsen ryokan night, Fuji views from"],
-        ["fg", "    Lake Ashi ropeway."],
-        ["fg", ""],
-        ["green", "  Day 5-6  Kyoto"],
-        ["fg", "    Fushimi Inari at dawn, Kiyomizu-dera,"],
-        ["fg", "    Arashiyama, evening in Gion."],
-        ["fg", ""],
-        ["green", "  Day 7    Osaka"],
-        ["fg", "    Osaka Castle, Dotonbori food crawl,"],
-        ["fg", "    fly out of KIX."],
-        ["fg", ""],
-        ["dim", "  tip: activate your JR Pass on Day 4."],
-        ["fg", ""]
-      ]);
+    ls: function (args) {
+      var all = false, paths = [];
+      for (var i = 0; i < args.length; i++) {
+        if (args[i] === "-a") all = true;
+        else if (args[i] === "-la" || args[i] === "-al") all = true;
+        else if (args[i].charAt(0) === "-") continue;
+        else paths.push(args[i]);
+      }
+      if (!paths.length) paths = ["."];
+      var chunks = [];
+      for (var p = 0; p < paths.length; p++) {
+        var n = nodeAt(normalize(paths[p]));
+        if (!n) throw new ShellError("ls: " + paths[p] + ": No such file or directory");
+        if (n.f) { chunks.push(paths[p]); continue; }
+        var names = Object.keys(n.c).sort();
+        var out = [];
+        for (var j = 0; j < names.length; j++) {
+          if (!all && names[j].charAt(0) === ".") continue;
+          out.push(names[j] + (n.c[names[j]].d ? "/" : ""));
+        }
+        var listing = out.join("\n");
+        chunks.push(paths.length > 1 ? paths[p] + ":\n" + listing : listing);
+      }
+      return chunks.join("\n\n");
     },
 
-    food: function () {
-      print([
-        ["yellow", "── EAT YOUR WAY THROUGH JAPAN ───────────"],
-        ["fg", ""],
-        ["cyan", "  ramen       ラーメン"],
-        ["fg", "    tonkotsu in Fukuoka, miso in Sapporo."],
-        ["cyan", "  sushi       寿司"],
-        ["fg", "    hit a standing sushi bar or Toyosu."],
-        ["cyan", "  okonomiyaki お好み焼き"],
-        ["fg", "    Osaka vs Hiroshima style — try both."],
-        ["cyan", "  takoyaki    たこ焼き"],
-        ["fg", "    molten octopus balls, Dotonbori."],
-        ["cyan", "  kaiseki     会席"],
-        ["fg", "    multi-course art, best in Kyoto."],
-        ["cyan", "  onigiri     おにぎり"],
-        ["fg", "    konbini onigiri are elite. Trust."],
-        ["cyan", "  wagyu       和牛"],
-        ["fg", "    Kobe, Matsusaka, or Omi beef."],
-        ["fg", ""],
-        ["dim", "  pro-tip: say 'oishii!' (delicious) often."],
-        ["fg", ""]
-      ]);
+    cd: function (args) {
+      var target = args.length ? args[0] : "~";
+      var parts = normalize(target);
+      var n = nodeAt(parts);
+      if (!n) throw new ShellError("cd: " + target + ": No such file or directory");
+      if (!n.d) throw new ShellError("cd: " + target + ": Not a directory");
+      cwd = parts;
+      return "";
     },
 
-    phrases: function () {
-      print([
-        ["yellow", "── SURVIVAL JAPANESE ────────────────────"],
-        ["fg", ""],
-        ["green", "  Konnichiwa  こんにちは"],
-        ["fg",    "    hello"],
-        ["green", "  Arigatou gozaimasu  ありがとうございます"],
-        ["fg",    "    thank you"],
-        ["green", "  Sumimasen  すみません"],
-        ["fg",    "    excuse me / sorry"],
-        ["green", "  Onegaishimasu  お願いします"],
-        ["fg",    "    please"],
-        ["green", "  Eigo wa hanasemasu ka?"],
-        ["fg",    "    do you speak English?"],
-        ["green", "  Ikura desu ka?  いくらですか"],
-        ["fg",    "    how much is it?"],
-        ["green", "  Oishii!  おいしい"],
-        ["fg",    "    delicious!"],
-        ["green", "  Kanpai!  乾杯"],
-        ["fg",    "    cheers!"],
-        ["green", "  Toire wa doko?  トイレはどこ"],
-        ["fg",    "    where's the toilet?"],
-        ["fg", ""],
-        ["dim", "  a little Japanese goes a very long way."],
-        ["fg", ""]
-      ]);
+    pwd: function () { return pathStr(cwd); },
+
+    cat: function (args, stdin) { return requireStdinOrFiles(args, stdin, "cat"); },
+
+    echo: function (args) { return args.join(" "); },
+
+    grep: function (args, stdin) {
+      var ci = false, rest = [];
+      for (var i = 0; i < args.length; i++) {
+        if (args[i] === "-i") ci = true; else rest.push(args[i]);
+      }
+      if (!rest.length) throw new ShellError("grep: missing pattern");
+      var pat = rest[0], files = rest.slice(1);
+      var text = requireStdinOrFiles(files, stdin, "grep");
+      var needle = ci ? pat.toLowerCase() : pat;
+      var lines = text.split("\n"), out = [];
+      for (var j = 0; j < lines.length; j++) {
+        var hay = ci ? lines[j].toLowerCase() : lines[j];
+        if (hay.indexOf(needle) !== -1) out.push(lines[j]);
+      }
+      return out.join("\n");
     },
 
-    tips: function () {
-      print([
-        ["yellow", "── TRAVEL TIPS ──────────────────────────"],
-        ["fg", ""],
-        ["fg", "  • Get a Suica/PASMO in Apple Wallet —"],
-        ["fg", "    it works on trains, buses & konbini."],
-        ["fg", "  • Cash still matters; 7-Eleven ATMs"],
-        ["fg", "    take foreign cards."],
-        ["fg", "  • Rent a pocket WiFi or grab an eSIM."],
-        ["fg", "  • Trash cans are rare — carry a bag."],
-        ["fg", "  • Stand left in Tokyo, right in Osaka"],
-        ["fg", "    on escalators."],
-        ["fg", "  • No tipping. Ever. It confuses people."],
-        ["fg", "  • Book Ghibli/teamLab/Shibuya Sky weeks"],
-        ["fg", "    ahead."],
-        ["fg", "  • Konbini food is genuinely great."],
-        ["fg", ""]
-      ]);
+    head: function (args, stdin) { return headTail(args, stdin, "head"); },
+    tail: function (args, stdin) { return headTail(args, stdin, "tail"); },
+
+    wc: function (args, stdin) {
+      var text = requireStdinOrFiles(args, stdin, "wc");
+      var lines = text.split("\n");
+      if (lines[lines.length - 1] === "") lines.pop();
+      var words = text.split(/\s+/).filter(function (w) { return w.length; }).length;
+      return lines.length + " " + words + " " + text.length + (args.length ? " " + args[0] : "");
     },
 
-    seasons: function () {
-      print([
-        ["yellow", "── WHEN TO VISIT ────────────────────────"],
-        ["fg", ""],
-        ["magenta", "  Spring  Mar–May   🌸"],
-        ["fg", "    Cherry blossoms; peak late Mar–early Apr."],
-        ["cyan", "  Summer  Jun–Aug   🎆"],
-        ["fg", "    Hot & humid; festivals and fireworks."],
-        ["yellow", "  Autumn  Sep–Nov   🍁"],
-        ["fg", "    Crisp air, red maples, best hiking."],
-        ["green", "  Winter  Dec–Feb   ⛄"],
-        ["fg", "    Powder snow in Hokkaido, quiet temples,"],
-        ["fg", "    steamy onsen season."],
-        ["fg", ""]
-      ]);
+    tree: function (args) {
+      var start = args.length ? args[0] : ".";
+      var n = nodeAt(normalize(start));
+      if (!n) throw new ShellError("tree: " + start + ": No such file or directory");
+      if (n.f) return start;
+      var out = [start === "." ? promptPath() : start];
+      (function walk(node, prefix) {
+        var names = Object.keys(node.c).sort();
+        for (var i = 0; i < names.length; i++) {
+          var last = i === names.length - 1;
+          var child = node.c[names[i]];
+          out.push(prefix + (last ? "`-- " : "|-- ") + names[i] + (child.d ? "/" : ""));
+          if (child.d) walk(child, prefix + (last ? "    " : "|   "));
+        }
+      })(n, "");
+      return out.join("\n");
     },
 
-    budget: function () {
-      print([
-        ["yellow", "── DAILY BUDGET (per person) ────────────"],
-        ["fg", ""],
-        ["green", "  Shoestring   ¥8,000–12,000  (~$55–80)"],
-        ["fg", "    hostels, konbini meals, local trains"],
-        ["cyan", "  Comfortable  ¥15,000–25,000 (~$100–170)"],
-        ["fg", "    business hotels, izakaya dinners"],
-        ["magenta", "  Splurge      ¥40,000+       (~$270+)"],
-        ["fg", "    ryokan with kaiseki, green car rides"],
-        ["fg", ""],
-        ["dim", "  JR Pass (7-day): ¥50,000 — worth it if"],
-        ["dim", "  you do Tokyo→Kyoto→Hiroshima round trip."],
-        ["fg", ""]
-      ]);
+    mkdir: function (args) {
+      var pFlag = false, paths = [];
+      for (var i = 0; i < args.length; i++) {
+        if (args[i] === "-p") pFlag = true; else paths.push(args[i]);
+      }
+      if (!paths.length) throw new ShellError("mkdir: missing operand");
+      for (var j = 0; j < paths.length; j++) {
+        var parts = normalize(paths[j]);
+        if (pFlag) {
+          var n = root;
+          for (var k = 0; k < parts.length; k++) {
+            if (!n.c[parts[k]]) n.c[parts[k]] = dir();
+            n = n.c[parts[k]];
+            if (!n.d) throw new ShellError("mkdir: " + paths[j] + ": not a directory");
+          }
+        } else {
+          var r = resolveParent(paths[j], "mkdir");
+          if (r.parent.c[r.name]) throw new ShellError("mkdir: " + paths[j] + ": File exists");
+          r.parent.c[r.name] = dir();
+        }
+      }
+      saveFS();
+      return "";
     },
 
-    transport: function () {
-      print([
-        ["yellow", "── GETTING AROUND ───────────────────────"],
-        ["fg", ""],
-        ["cyan", "  Shinkansen  新幹線"],
-        ["fg", "    Tokyo→Kyoto in 2h15m. Reserve seats"],
-        ["fg", "    on the smartEX app."],
-        ["cyan", "  IC cards    Suica / PASMO / ICOCA"],
-        ["fg", "    tap onto almost anything that moves."],
-        ["cyan", "  Metro"],
-        ["fg", "    Google Maps transit is excellent."],
-        ["cyan", "  Taxis"],
-        ["fg", "    doors open themselves — don't touch!"],
-        ["fg", ""]
-      ]);
+    touch: function (args) {
+      if (!args.length) throw new ShellError("touch: missing operand");
+      for (var i = 0; i < args.length; i++) {
+        var r = resolveParent(args[i], "touch");
+        if (!r.parent.c[r.name]) r.parent.c[r.name] = file("");
+      }
+      saveFS();
+      return "";
     },
 
-    fortune: function () {
-      var fortunes = [
-        ["green",  "  大吉 DAI-KICHI — Great blessing! Book the trip."],
-        ["green",  "  吉 KICHI — Blessing. Sunny skies over Fuji await."],
-        ["cyan",   "  中吉 CHUU-KICHI — Middle blessing. Pack an umbrella."],
-        ["yellow", "  小吉 SHOU-KICHI — Small blessing. The ramen line moves fast."],
-        ["yellow", "  末吉 SUE-KICHI — Future blessing. Your JR Pass pays off later."],
-        ["red",    "  凶 KYOU — Curse... tie this fortune to a tree and draw again."]
-      ];
-      var f = fortunes[Math.floor(Math.random() * fortunes.length)];
-      print([
-        ["yellow", "── OMIKUJI おみくじ ─────────────────────"],
-        ["fg", ""],
-        f,
-        ["fg", ""]
-      ]);
+    rm: function (args) {
+      var rec = false, paths = [];
+      for (var i = 0; i < args.length; i++) {
+        if (args[i] === "-r" || args[i] === "-rf" || args[i] === "-fr") rec = true;
+        else paths.push(args[i]);
+      }
+      if (!paths.length) throw new ShellError("rm: missing operand");
+      for (var j = 0; j < paths.length; j++) {
+        var parts = normalize(paths[j]);
+        if (!parts.length) throw new ShellError("rm: cannot remove '/'");
+        var r = resolveParent(paths[j], "rm");
+        var n = r.parent.c[r.name];
+        if (!n) throw new ShellError("rm: " + paths[j] + ": No such file or directory");
+        if (n.d && !rec) throw new ShellError("rm: " + paths[j] + ": Is a directory (use rm -r)");
+        delete r.parent.c[r.name];
+        // if we deleted a dir we're inside of, climb out
+        if (pathStr(cwd).indexOf(pathStr(parts)) === 0 && nodeAt(cwd) === null) cwd = parts.slice(0, -1);
+      }
+      saveFS();
+      return "";
     },
 
-    banner: function () { print(BANNER); },
+    rmdir: function (args) {
+      if (!args.length) throw new ShellError("rmdir: missing operand");
+      var r = resolveParent(args[0], "rmdir");
+      var n = r.parent.c[r.name];
+      if (!n) throw new ShellError("rmdir: " + args[0] + ": No such file or directory");
+      if (!n.d) throw new ShellError("rmdir: " + args[0] + ": Not a directory");
+      if (Object.keys(n.c).length) throw new ShellError("rmdir: " + args[0] + ": Directory not empty");
+      delete r.parent.c[r.name];
+      saveFS();
+      return "";
+    },
+
+    mv: function (args) {
+      if (args.length < 2) throw new ShellError("mv: missing operand");
+      var src = resolveParent(args[0], "mv");
+      var n = src.parent.c[src.name];
+      if (!n) throw new ShellError("mv: " + args[0] + ": No such file or directory");
+      var dstNode = nodeAt(normalize(args[1]));
+      var dst;
+      if (dstNode && dstNode.d) {
+        dst = { parent: dstNode, name: src.name };
+      } else {
+        dst = resolveParent(args[1], "mv");
+      }
+      if (dst.parent === src.parent && dst.name === src.name) return "";
+      dst.parent.c[dst.name] = n;
+      delete src.parent.c[src.name];
+      saveFS();
+      return "";
+    },
+
+    cp: function (args) {
+      var rec = false, rest = [];
+      for (var i = 0; i < args.length; i++) {
+        if (args[i] === "-r") rec = true; else rest.push(args[i]);
+      }
+      if (rest.length < 2) throw new ShellError("cp: missing operand");
+      var srcNode = nodeAt(normalize(rest[0]));
+      if (!srcNode) throw new ShellError("cp: " + rest[0] + ": No such file or directory");
+      if (srcNode.d && !rec) throw new ShellError("cp: " + rest[0] + ": Is a directory (use cp -r)");
+      var srcName = normalize(rest[0]).pop();
+      var dstNode = nodeAt(normalize(rest[1]));
+      var dst;
+      if (dstNode && dstNode.d) dst = { parent: dstNode, name: srcName };
+      else dst = resolveParent(rest[1], "cp");
+      dst.parent.c[dst.name] = JSON.parse(JSON.stringify(srcNode));
+      saveFS();
+      return "";
+    },
+
+    history: function () {
+      var out = [];
+      for (var i = 0; i < history.length; i++) out.push("  " + (i + 1) + "  " + history[i]);
+      return out.join("\n");
+    },
+
+    clear: function () { screenEl.innerHTML = ""; return ""; },
 
     date: function () {
       var now = new Date();
-      var jst = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
-      print([
-        ["fg", "  local: " + now.toString()],
-        ["cyan", "  tokyo: " + jst.toString().replace(/GMT.*$/, "JST")],
-        ["fg", ""]
-      ]);
+      var jst = now.toLocaleString("en-US", { timeZone: "Asia/Tokyo", hour12: false });
+      return now.toString() + "\nJST: " + jst;
     },
 
-    whoami: function () {
-      print([["fg", "  traveler — future explorer of Japan 🗾"], ["fg", ""]]);
+    whoami: function () { return USER; },
+    hostname: function () { return HOST; },
+
+    uname: function (args) {
+      if (args[0] === "-a") return "JapanOS japan 1.0-jsh #1 " + navigator.platform + " JavaScript";
+      return "JapanOS";
     },
 
-    clear: function () { screen.innerHTML = ""; },
+    neofetch: function () {
+      var up = Math.max(1, Math.round((Date.now() - BOOT_TIME) / 60000));
+      return [
+        "      ,--.       " + USER + "@" + HOST,
+        "     (    )      ----------------",
+        "      `--'       OS: JapanOS 1.0 (web)",
+        "   .-~~~~~~-.    Host: " + (navigator.platform || "browser"),
+        "  (  NIPPON  )   Shell: jsh 1.0",
+        "   `-~~~~~~-'    Uptime: " + up + " min",
+        "                 Theme: Tokyo Night",
+        "                 Locale: Asia/Tokyo"
+      ].join("\n");
+    },
+
+    fortune: function () {
+      var f = [
+        "DAI-KICHI (great blessing): book the trip.",
+        "KICHI (blessing): sunny skies over Fuji await.",
+        "CHUU-KICHI (middle blessing): pack an umbrella.",
+        "SHOU-KICHI (small blessing): the ramen line moves fast.",
+        "SUE-KICHI (future blessing): your JR Pass pays off later.",
+        "KYOU (curse): tie this fortune to a tree and draw again."
+      ];
+      return "omikuji says: " + f[Math.floor(Math.random() * f.length)];
+    },
+
+    cowsay: function (args, stdin) {
+      var msg = args.length ? args.join(" ") : (stdin ? stdin.split("\n")[0] : "moo");
+      var top = " " + repeat("_", msg.length + 2);
+      var bot = " " + repeat("-", msg.length + 2);
+      return [
+        top,
+        "< " + msg + " >",
+        bot,
+        "        \\   ^__^",
+        "         \\  (oo)\\_______",
+        "            (__)\\       )\\/\\",
+        "                ||----w |",
+        "                ||     ||"
+      ].join("\n");
+    },
 
     sudo: function () {
-      print([["red", "  traveler is not in the sudoers file."],
-             ["red", "  This incident will be reported to the shogun."],
-             ["fg", ""]]);
+      throw new ShellError(USER + " is not in the sudoers file. This incident will be reported to the shogun.");
     },
 
-    konami: function () {
-      print([["magenta", "  🎌 You found a secret! Free imaginary mochi for you."], ["fg", ""]]);
+    exit: function () { return "logout\n(there is no escape - this is your home now)"; },
+
+    reboot: function () { setTimeout(function () { location.reload(); }, 300); return "rebooting..."; },
+
+    reset: function () {
+      try { localStorage.removeItem(FS_KEY); localStorage.removeItem(HIST_KEY); } catch (e) {}
+      setTimeout(function () { location.reload(); }, 300);
+      return "filesystem reset to factory state, rebooting...";
+    },
+
+    edit: function (args) {
+      if (!args.length) throw new ShellError("edit: missing file name");
+      openEditor(args[0]);
+      return "";
     }
   };
+  COMMANDS.nano = COMMANDS.edit;
+  COMMANDS.vi = COMMANDS.edit;
+  COMMANDS.vim = COMMANDS.edit;
+  COMMANDS.ll = function (a, s) { return COMMANDS.ls(["-a"].concat(a), s); };
 
-  function run(raw) {
-    var trimmed = raw.trim();
+  function repeat(ch, n) { var s = ""; while (n-- > 0) s += ch; return s; }
+
+  function headTail(args, stdin, which) {
+    var n = 10, files = [];
+    for (var i = 0; i < args.length; i++) {
+      if (args[i] === "-n") { n = parseInt(args[i + 1], 10) || 10; i++; }
+      else files.push(args[i]);
+    }
+    var text = requireStdinOrFiles(files, stdin, which);
+    var lines = text.split("\n");
+    if (lines[lines.length - 1] === "") lines.pop();
+    var picked = which === "head" ? lines.slice(0, n) : lines.slice(-n);
+    return picked.join("\n");
+  }
+
+  /* ---------- pipeline runner ---------- */
+
+  function runLine(raw) {
+    var trimmed = raw.replace(/\s+$/, "");
     echoCmd(trimmed);
-    if (!trimmed) { screen.scrollTop = screen.scrollHeight; return; }
+    if (!trimmed.trim()) { scrollDown(); return; }
 
     history.push(trimmed);
+    if (history.length > 200) history.shift();
     histIdx = history.length;
+    try { localStorage.setItem(HIST_KEY, JSON.stringify(history)); } catch (e) {}
 
-    var parts = trimmed.split(/\s+/);
-    var name = parts[0].toLowerCase();
-    var args = parts.slice(1).join(" ");
+    try {
+      var toks = tokenize(trimmed);
+      // split into pipe segments
+      var segments = [[]], i;
+      for (i = 0; i < toks.length; i++) {
+        if (toks[i] === OP + "|") segments.push([]);
+        else segments[segments.length - 1].push(toks[i]);
+      }
+      // extract redirection from the last segment
+      var redir = null;
+      var last = segments[segments.length - 1];
+      for (i = 0; i < last.length; i++) {
+        if (last[i] === OP + ">" || last[i] === OP + ">>") {
+          if (i + 1 >= last.length) throw new ShellError("jsh: syntax error near '>'");
+          redir = { append: last[i] === OP + ">>", target: last[i + 1] };
+          last.splice(i, 2);
+          break;
+        }
+      }
+      for (var s = 0; s < segments.length; s++) {
+        if (!segments[s].length) throw new ShellError("jsh: syntax error near '|'");
+        if (segments[s].indexOf(OP + ">") !== -1 || segments[s].indexOf(OP + ">>") !== -1) {
+          throw new ShellError("jsh: redirection is only supported at the end of a pipeline");
+        }
+      }
 
-    if (name === "echo") {
-      print([["fg", "  " + args], ["fg", ""]]);
-    } else if (commands[name]) {
-      commands[name]();
-    } else {
-      print([
-        ["red", "  command not found: " + name],
-        ["dim", "  type 'help' to see what I know."],
-        ["fg", ""]
-      ]);
+      var data = "";
+      for (s = 0; s < segments.length; s++) {
+        var argv = segments[s];
+        var name = argv[0];
+        var fn = COMMANDS[name];
+        if (!fn) throw new ShellError("jsh: command not found: " + name + " (try 'help')");
+        data = fn(argv.slice(1), data) || "";
+      }
+
+      if (redir) {
+        var r = resolveParent(redir.target, "jsh");
+        var existing = r.parent.c[r.name];
+        if (existing && existing.d) throw new ShellError("jsh: " + redir.target + ": Is a directory");
+        var content = data.length && data.charAt(data.length - 1) !== "\n" ? data + "\n" : data;
+        if (redir.append && existing) existing.x += content;
+        else r.parent.c[r.name] = file(content);
+        saveFS();
+      } else if (data) {
+        printBlock("", data);
+      }
+    } catch (e) {
+      if (e instanceof ShellError) printBlock("red", e.msg);
+      else printBlock("red", "jsh: internal error: " + (e.message || e));
     }
-    screen.scrollTop = screen.scrollHeight;
+    refreshPrompt();
+    scrollDown();
   }
+
+  /* ---------- tab completion ---------- */
+
+  function complete() {
+    var val = input.value;
+    var m = val.match(/(^|[\s|>]+)([^\s|>]*)$/);
+    if (!m) return;
+    var token = m[2];
+    var before = val.slice(0, val.length - token.length);
+    var isFirst = before.trim() === "" ;
+    var candidates = [];
+
+    if (isFirst && token.indexOf("/") === -1 && token.charAt(0) !== "~" && token.charAt(0) !== ".") {
+      var names = Object.keys(COMMANDS).sort();
+      for (var i = 0; i < names.length; i++) {
+        if (names[i].indexOf(token) === 0) candidates.push({ text: names[i], dir: false });
+      }
+    } else {
+      var slash = token.lastIndexOf("/");
+      var dirPart = slash === -1 ? "" : token.slice(0, slash + 1);
+      var prefix = slash === -1 ? token : token.slice(slash + 1);
+      var dirNode = nodeAt(normalize(dirPart === "" ? "." : dirPart));
+      if (!dirNode || !dirNode.d) return;
+      var kids = Object.keys(dirNode.c).sort();
+      for (var j = 0; j < kids.length; j++) {
+        if (kids[j].indexOf(prefix) === 0 && (prefix.charAt(0) === "." || kids[j].charAt(0) !== ".")) {
+          candidates.push({ text: dirPart + kids[j], dir: !!dirNode.c[kids[j]].d });
+        }
+      }
+    }
+
+    if (!candidates.length) return;
+    if (candidates.length === 1) {
+      input.value = before + candidates[0].text + (candidates[0].dir ? "/" : " ");
+      return;
+    }
+    // common prefix
+    var common = candidates[0].text;
+    for (var k = 1; k < candidates.length; k++) {
+      while (candidates[k].text.indexOf(common) !== 0) common = common.slice(0, -1);
+    }
+    if (common.length > token.length) { input.value = before + common; return; }
+    // show options
+    echoCmd(val);
+    var shown = [];
+    for (var c = 0; c < candidates.length; c++) shown.push(candidates[c].text + (candidates[c].dir ? "/" : ""));
+    printBlock("dim", shown.join("  "));
+    scrollDown();
+  }
+
+  /* ---------- editor ---------- */
+
+  var editorEl = document.getElementById("editor");
+  var edText = document.getElementById("edtext");
+  var edTarget = null;
+
+  function openEditor(pathArg) {
+    var r = resolveParent(pathArg, "edit");
+    var n = r.parent.c[r.name];
+    if (n && n.d) throw new ShellError("edit: " + pathArg + ": Is a directory");
+    edTarget = r;
+    editorEl.querySelector(".fname").textContent = "edit: " + pathArg;
+    edText.value = n ? n.x : "";
+    editorEl.classList.add("open");
+    setTimeout(function () { edText.focus(); }, 50);
+  }
+
+  editorEl.querySelector(".save").addEventListener("click", function () {
+    if (edTarget) {
+      var content = edText.value;
+      var existing = edTarget.parent.c[edTarget.name];
+      if (existing && existing.f) existing.x = content;
+      else edTarget.parent.c[edTarget.name] = file(content);
+      saveFS();
+      printBlock("dim", "wrote " + edTarget.name + " (" + content.length + " chars)");
+    }
+    editorEl.classList.remove("open");
+    edTarget = null;
+    scrollDown();
+    input.focus();
+  });
+  editorEl.querySelector(".cancel").addEventListener("click", function () {
+    editorEl.classList.remove("open");
+    edTarget = null;
+    input.focus();
+  });
+
+  /* ---------- input wiring ---------- */
+
+  var history = [];
+  try { history = JSON.parse(localStorage.getItem(HIST_KEY)) || []; } catch (e) { history = []; }
+  var histIdx = history.length;
 
   function submit() {
     var v = input.value;
     input.value = "";
-    run(v);
-    // keep the keyboard open on iOS by refocusing synchronously
+    runLine(v);
     input.focus();
+  }
+
+  function histUp() {
+    if (histIdx > 0) { histIdx--; input.value = history[histIdx]; }
+  }
+  function histDown() {
+    if (histIdx < history.length - 1) { histIdx++; input.value = history[histIdx]; }
+    else { histIdx = history.length; input.value = ""; }
   }
 
   input.addEventListener("keydown", function (e) {
     if (e.key === "Enter") { e.preventDefault(); submit(); }
-    else if (e.key === "ArrowUp") {
+    else if (e.key === "ArrowUp") { e.preventDefault(); histUp(); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); histDown(); }
+    else if (e.key === "Tab") { e.preventDefault(); complete(); }
+    else if (e.key === "c" && e.ctrlKey) {
       e.preventDefault();
-      if (histIdx > 0) { histIdx--; input.value = history[histIdx]; }
-    } else if (e.key === "ArrowDown") {
+      echoCmd(input.value + "^C");
+      input.value = "";
+      scrollDown();
+    } else if (e.key === "l" && e.ctrlKey) {
       e.preventDefault();
-      if (histIdx < history.length - 1) { histIdx++; input.value = history[histIdx]; }
-      else { histIdx = history.length; input.value = ""; }
+      screenEl.innerHTML = "";
     }
   });
 
-  enter.addEventListener("click", submit);
+  document.getElementById("enter").addEventListener("click", submit);
 
-  document.getElementById("quickbar").addEventListener("click", function (e) {
+  document.getElementById("keybar").addEventListener("click", function (e) {
     var b = e.target.closest("button");
     if (!b) return;
-    input.value = b.getAttribute("data-cmd");
-    submit();
+    if (b.hasAttribute("data-ins")) {
+      var ins = b.getAttribute("data-ins");
+      input.value += (ins === "|" || ins === ">") ? " " + ins + " " : ins;
+      input.focus();
+      return;
+    }
+    if (b.hasAttribute("data-run")) {
+      input.value = b.getAttribute("data-run");
+      submit();
+      return;
+    }
+    var k = b.getAttribute("data-key");
+    if (k === "tab") complete();
+    else if (k === "up") histUp();
+    else if (k === "down") histDown();
+    else if (k === "ctrlc") { echoCmd(input.value + "^C"); input.value = ""; scrollDown(); }
+    input.focus();
   });
 
-  // Tapping the screen area focuses the input (like a real terminal),
-  // but don't steal focus while the user is scrolling or selecting text.
   var touchMoved = false;
-  screen.addEventListener("touchstart", function () { touchMoved = false; }, { passive: true });
-  screen.addEventListener("touchmove",  function () { touchMoved = true;  }, { passive: true });
-  screen.addEventListener("touchend", function () {
+  screenEl.addEventListener("touchstart", function () { touchMoved = false; }, { passive: true });
+  screenEl.addEventListener("touchmove", function () { touchMoved = true; }, { passive: true });
+  screenEl.addEventListener("touchend", function () {
     if (!touchMoved && !window.getSelection().toString()) input.focus();
   });
-  screen.addEventListener("click", function () {
+  screenEl.addEventListener("click", function () {
     if (!window.getSelection().toString()) input.focus();
   });
 
-  // Keep the layout glued to the visual viewport when the iOS keyboard opens.
   if (window.visualViewport) {
     var vv = window.visualViewport;
-    function fitViewport() {
+    var fit = function () {
       document.body.style.height = vv.height + "px";
       window.scrollTo(0, 0);
-      screen.scrollTop = screen.scrollHeight;
-    }
-    vv.addEventListener("resize", fitViewport);
+      scrollDown();
+    };
+    vv.addEventListener("resize", fit);
     vv.addEventListener("scroll", function () { window.scrollTo(0, 0); });
   }
 
-  print(BANNER);
+  /* ---------- boot ---------- */
+
+  root = loadFS() || factoryFS();
+  cwd = ["home", USER];
+  if (!nodeAt(cwd)) { root = factoryFS(); cwd = ["home", USER]; }
+
+  printLine("dim", "JapanOS 1.0 LTS " + HOST + " tty1");
+  printLine("", "");
+  printLine("cyan", "Welcome to JapanOS (jsh shell)");
+  printLine("", "");
+  printLine("", " * Guides:   ls guides");
+  printLine("", " * Read one: cat guides/food.txt");
+  printLine("", " * Search:   grep -i ramen guides/food.txt");
+  printLine("", " * Help:     help");
+  printLine("", "");
+  printLine("dim", "Files you create are saved on this device.");
+  printLine("", "");
+  refreshPrompt();
+  scrollDown();
 })();
 </script>
 </body>
