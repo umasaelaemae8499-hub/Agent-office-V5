@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Japan Term">
+<meta name="theme-color" content="#0d1117">
+<title>Japan Travel Terminal</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --fg: #c9d1d9;
+    --green: #3fb950;
+    --cyan: #56d4dd;
+    --yellow: #e3b341;
+    --red: #f85149;
+    --magenta: #d2a8ff;
+    --dim: #8b949e;
+    --accent: #ff6b81;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    overscroll-behavior: none;
+    background: var(--bg);
+  }
+  body {
+    font-family: "SF Mono", ui-monospace, Menlo, Monaco, "Cascadia Mono", monospace;
+    color: var(--fg);
+    display: flex;
+    flex-direction: column;
+    /* Fill the visual viewport; safe areas for the notch and home indicator */
+    height: 100dvh;
+    padding-top: env(safe-area-inset-top);
+  }
+  #titlebar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--panel);
+    border-bottom: 1px solid #21262d;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; } .dot.y { background: #febc2e; } .dot.g { background: #28c840; }
+  #titlebar .title {
+    flex: 1;
+    text-align: center;
+    font-size: 13px;
+    color: var(--dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #screen {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 14px 8px;
+    font-size: 14px;
+    line-height: 1.55;
+    word-break: break-word;
+  }
+  #screen .line { white-space: pre-wrap; }
+  .green { color: var(--green); }
+  .cyan { color: var(--cyan); }
+  .yellow { color: var(--yellow); }
+  .red { color: var(--red); }
+  .magenta { color: var(--magenta); }
+  .dim { color: var(--dim); }
+  .accent { color: var(--accent); }
+  a { color: var(--cyan); }
+  #inputbar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    background: var(--panel);
+    border-top: 1px solid #21262d;
+  }
+  #prompt { color: var(--green); font-size: 15px; white-space: nowrap; }
+  #cmd {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--fg);
+    font-family: inherit;
+    /* 16px minimum stops iOS Safari from zooming in when the field is focused */
+    font-size: 16px;
+    caret-color: var(--green);
+  }
+  #cmd::placeholder { color: #484f58; }
+  #enter {
+    background: #21262d;
+    color: var(--green);
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 8px 14px;
+    touch-action: manipulation;
+  }
+  #enter:active { background: #30363d; }
+  #quickbar {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 14px;
+    background: var(--bg);
+    border-top: 1px solid #21262d;
+    scrollbar-width: none;
+  }
+  #quickbar::-webkit-scrollbar { display: none; }
+  #quickbar button {
+    flex: 0 0 auto;
+    background: #161b22;
+    color: var(--cyan);
+    border: 1px solid #30363d;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    touch-action: manipulation;
+  }
+  #quickbar button:active { background: #21262d; }
+  .cursor {
+    display: inline-block;
+    width: 8px; height: 15px;
+    background: var(--green);
+    vertical-align: text-bottom;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+
+<div id="titlebar">
+  <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+  <span class="title">traveler@japan — にほん — 80×24</span>
+</div>
+
+<div id="screen" aria-live="polite"></div>
+
+<div id="quickbar">
+  <button data-cmd="help">help</button>
+  <button data-cmd="destinations">destinations</button>
+  <button data-cmd="itinerary">itinerary</button>
+  <button data-cmd="food">food</button>
+  <button data-cmd="phrases">phrases</button>
+  <button data-cmd="tips">tips</button>
+  <button data-cmd="seasons">seasons</button>
+  <button data-cmd="budget">budget</button>
+  <button data-cmd="clear">clear</button>
+</div>
+
+<div id="inputbar">
+  <span id="prompt">traveler@japan:~$</span>
+  <input id="cmd" type="text" autocomplete="off" autocorrect="off" autocapitalize="off"
+         spellcheck="false" enterkeyhint="go" placeholder="type help">
+  <button id="enter" aria-label="run command">⏎</button>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var screen = document.getElementById("screen");
+  var input  = document.getElementById("cmd");
+  var enter  = document.getElementById("enter");
+  var history = [];
+  var histIdx = -1;
+
+  var BANNER = [
+    ["accent", " ⛩  JAPAN TRAVEL TERMINAL  ⛩"],
+    ["dim",    " ────────────────────────────────"],
+    ["fg",     " ようこそ! Welcome aboard, traveler."],
+    ["fg",     " Explore Japan from the command line."],
+    ["dim",    " ────────────────────────────────"],
+    ["green",  " Type 'help' or tap a chip below."],
+    ["fg",     ""]
+  ];
+
+  function el(cls, text) {
+    var d = document.createElement("div");
+    d.className = "line" + (cls && cls !== "fg" ? " " + cls : "");
+    d.textContent = text;
+    return d;
+  }
+
+  function print(lines) {
+    for (var i = 0; i < lines.length; i++) {
+      screen.appendChild(el(lines[i][0], lines[i][1]));
+    }
+    screen.scrollTop = screen.scrollHeight;
+  }
+
+  function echoCmd(raw) {
+    var d = document.createElement("div");
+    d.className = "line";
+    var p = document.createElement("span");
+    p.className = "green";
+    p.textContent = "traveler@japan:~$ ";
+    d.appendChild(p);
+    d.appendChild(document.createTextNode(raw));
+    screen.appendChild(d);
+  }
+
+  var commands = {
+    help: function () {
+      print([
+        ["yellow", "── AVAILABLE COMMANDS ───────────────────"],
+        ["fg", ""],
+        ["cyan", "  destinations   where to go"],
+        ["cyan", "  itinerary      a classic 7-day route"],
+        ["cyan", "  food           what to eat"],
+        ["cyan", "  phrases        essential Japanese"],
+        ["cyan", "  tips           travel know-how"],
+        ["cyan", "  seasons        when to visit"],
+        ["cyan", "  budget         daily cost guide"],
+        ["cyan", "  transport      getting around"],
+        ["cyan", "  fortune        omikuji — draw your luck"],
+        ["cyan", "  banner         reprint the welcome"],
+        ["cyan", "  date           current date & time"],
+        ["cyan", "  whoami         who are you?"],
+        ["cyan", "  echo <text>    repeat after you"],
+        ["cyan", "  clear          wipe the screen"],
+        ["fg", ""]
+      ]);
+    },
+
+    destinations: function () {
+      print([
+        ["yellow", "── DESTINATIONS ─────────────────────────"],
+        ["fg", ""],
+        ["magenta", "  Tokyo      東京"],
+        ["fg", "    Shibuya Crossing, Senso-ji, Akihabara,"],
+        ["fg", "    teamLab, Tsukiji outer market."],
+        ["fg", ""],
+        ["magenta", "  Kyoto      京都"],
+        ["fg", "    Fushimi Inari's 10,000 torii gates,"],
+        ["fg", "    Kinkaku-ji, Arashiyama bamboo grove, Gion."],
+        ["fg", ""],
+        ["magenta", "  Osaka      大阪"],
+        ["fg", "    Dotonbori neon, Osaka Castle, street food"],
+        ["fg", "    capital of Japan (kuidaore!)."],
+        ["fg", ""],
+        ["magenta", "  Nara       奈良"],
+        ["fg", "    Bowing deer, Todai-ji Great Buddha."],
+        ["fg", ""],
+        ["magenta", "  Hakone     箱根"],
+        ["fg", "    Onsen, ryokan stays, Mt. Fuji views."],
+        ["fg", ""],
+        ["magenta", "  Hiroshima  広島"],
+        ["fg", "    Peace Memorial, Miyajima floating torii."],
+        ["fg", ""],
+        ["magenta", "  Sapporo    札幌"],
+        ["fg", "    Snow festival, powder skiing, miso ramen."],
+        ["fg", ""],
+        ["magenta", "  Okinawa    沖縄"],
+        ["fg", "    Beaches, coral reefs, Ryukyu culture."],
+        ["fg", ""]
+      ]);
+    },
+
+    itinerary: function () {
+      print([
+        ["yellow", "── 7-DAY GOLDEN ROUTE ───────────────────"],
+        ["fg", ""],
+        ["green", "  Day 1-3  Tokyo"],
+        ["fg", "    Arrive HND/NRT → Shibuya & Shinjuku,"],
+        ["fg", "    Asakusa + Senso-ji, Akihabara, day trip"],
+        ["fg", "    option: Nikko or Kamakura."],
+        ["fg", ""],
+        ["green", "  Day 4    Hakone"],
+        ["fg", "    Onsen ryokan night, Fuji views from"],
+        ["fg", "    Lake Ashi ropeway."],
+        ["fg", ""],
+        ["green", "  Day 5-6  Kyoto"],
+        ["fg", "    Fushimi Inari at dawn, Kiyomizu-dera,"],
+        ["fg", "    Arashiyama, evening in Gion."],
+        ["fg", ""],
+        ["green", "  Day 7    Osaka"],
+        ["fg", "    Osaka Castle, Dotonbori food crawl,"],
+        ["fg", "    fly out of KIX."],
+        ["fg", ""],
+        ["dim", "  tip: activate your JR Pass on Day 4."],
+        ["fg", ""]
+      ]);
+    },
+
+    food: function () {
+      print([
+        ["yellow", "── EAT YOUR WAY THROUGH JAPAN ───────────"],
+        ["fg", ""],
+        ["cyan", "  ramen       ラーメン"],
+        ["fg", "    tonkotsu in Fukuoka, miso in Sapporo."],
+        ["cyan", "  sushi       寿司"],
+        ["fg", "    hit a standing sushi bar or Toyosu."],
+        ["cyan", "  okonomiyaki お好み焼き"],
+        ["fg", "    Osaka vs Hiroshima style — try both."],
+        ["cyan", "  takoyaki    たこ焼き"],
+        ["fg", "    molten octopus balls, Dotonbori."],
+        ["cyan", "  kaiseki     会席"],
+        ["fg", "    multi-course art, best in Kyoto."],
+        ["cyan", "  onigiri     おにぎり"],
+        ["fg", "    konbini onigiri are elite. Trust."],
+        ["cyan", "  wagyu       和牛"],
+        ["fg", "    Kobe, Matsusaka, or Omi beef."],
+        ["fg", ""],
+        ["dim", "  pro-tip: say 'oishii!' (delicious) often."],
+        ["fg", ""]
+      ]);
+    },
+
+    phrases: function () {
+      print([
+        ["yellow", "── SURVIVAL JAPANESE ────────────────────"],
+        ["fg", ""],
+        ["green", "  Konnichiwa  こんにちは"],
+        ["fg",    "    hello"],
+        ["green", "  Arigatou gozaimasu  ありがとうございます"],
+        ["fg",    "    thank you"],
+        ["green", "  Sumimasen  すみません"],
+        ["fg",    "    excuse me / sorry"],
+        ["green", "  Onegaishimasu  お願いします"],
+        ["fg",    "    please"],
+        ["green", "  Eigo wa hanasemasu ka?"],
+        ["fg",    "    do you speak English?"],
+        ["green", "  Ikura desu ka?  いくらですか"],
+        ["fg",    "    how much is it?"],
+        ["green", "  Oishii!  おいしい"],
+        ["fg",    "    delicious!"],
+        ["green", "  Kanpai!  乾杯"],
+        ["fg",    "    cheers!"],
+        ["green", "  Toire wa doko?  トイレはどこ"],
+        ["fg",    "    where's the toilet?"],
+        ["fg", ""],
+        ["dim", "  a little Japanese goes a very long way."],
+        ["fg", ""]
+      ]);
+    },
+
+    tips: function () {
+      print([
+        ["yellow", "── TRAVEL TIPS ──────────────────────────"],
+        ["fg", ""],
+        ["fg", "  • Get a Suica/PASMO in Apple Wallet —"],
+        ["fg", "    it works on trains, buses & konbini."],
+        ["fg", "  • Cash still matters; 7-Eleven ATMs"],
+        ["fg", "    take foreign cards."],
+        ["fg", "  • Rent a pocket WiFi or grab an eSIM."],
+        ["fg", "  • Trash cans are rare — carry a bag."],
+        ["fg", "  • Stand left in Tokyo, right in Osaka"],
+        ["fg", "    on escalators."],
+        ["fg", "  • No tipping. Ever. It confuses people."],
+        ["fg", "  • Book Ghibli/teamLab/Shibuya Sky weeks"],
+        ["fg", "    ahead."],
+        ["fg", "  • Konbini food is genuinely great."],
+        ["fg", ""]
+      ]);
+    },
+
+    seasons: function () {
+      print([
+        ["yellow", "── WHEN TO VISIT ────────────────────────"],
+        ["fg", ""],
+        ["magenta", "  Spring  Mar–May   🌸"],
+        ["fg", "    Cherry blossoms; peak late Mar–early Apr."],
+        ["cyan", "  Summer  Jun–Aug   🎆"],
+        ["fg", "    Hot & humid; festivals and fireworks."],
+        ["yellow", "  Autumn  Sep–Nov   🍁"],
+        ["fg", "    Crisp air, red maples, best hiking."],
+        ["green", "  Winter  Dec–Feb   ⛄"],
+        ["fg", "    Powder snow in Hokkaido, quiet temples,"],
+        ["fg", "    steamy onsen season."],
+        ["fg", ""]
+      ]);
+    },
+
+    budget: function () {
+      print([
+        ["yellow", "── DAILY BUDGET (per person) ────────────"],
+        ["fg", ""],
+        ["green", "  Shoestring   ¥8,000–12,000  (~$55–80)"],
+        ["fg", "    hostels, konbini meals, local trains"],
+        ["cyan", "  Comfortable  ¥15,000–25,000 (~$100–170)"],
+        ["fg", "    business hotels, izakaya dinners"],
+        ["magenta", "  Splurge      ¥40,000+       (~$270+)"],
+        ["fg", "    ryokan with kaiseki, green car rides"],
+        ["fg", ""],
+        ["dim", "  JR Pass (7-day): ¥50,000 — worth it if"],
+        ["dim", "  you do Tokyo→Kyoto→Hiroshima round trip."],
+        ["fg", ""]
+      ]);
+    },
+
+    transport: function () {
+      print([
+        ["yellow", "── GETTING AROUND ───────────────────────"],
+        ["fg", ""],
+        ["cyan", "  Shinkansen  新幹線"],
+        ["fg", "    Tokyo→Kyoto in 2h15m. Reserve seats"],
+        ["fg", "    on the smartEX app."],
+        ["cyan", "  IC cards    Suica / PASMO / ICOCA"],
+        ["fg", "    tap onto almost anything that moves."],
+        ["cyan", "  Metro"],
+        ["fg", "    Google Maps transit is excellent."],
+        ["cyan", "  Taxis"],
+        ["fg", "    doors open themselves — don't touch!"],
+        ["fg", ""]
+      ]);
+    },
+
+    fortune: function () {
+      var fortunes = [
+        ["green",  "  大吉 DAI-KICHI — Great blessing! Book the trip."],
+        ["green",  "  吉 KICHI — Blessing. Sunny skies over Fuji await."],
+        ["cyan",   "  中吉 CHUU-KICHI — Middle blessing. Pack an umbrella."],
+        ["yellow", "  小吉 SHOU-KICHI — Small blessing. The ramen line moves fast."],
+        ["yellow", "  末吉 SUE-KICHI — Future blessing. Your JR Pass pays off later."],
+        ["red",    "  凶 KYOU — Curse... tie this fortune to a tree and draw again."]
+      ];
+      var f = fortunes[Math.floor(Math.random() * fortunes.length)];
+      print([
+        ["yellow", "── OMIKUJI おみくじ ─────────────────────"],
+        ["fg", ""],
+        f,
+        ["fg", ""]
+      ]);
+    },
+
+    banner: function () { print(BANNER); },
+
+    date: function () {
+      var now = new Date();
+      var jst = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+      print([
+        ["fg", "  local: " + now.toString()],
+        ["cyan", "  tokyo: " + jst.toString().replace(/GMT.*$/, "JST")],
+        ["fg", ""]
+      ]);
+    },
+
+    whoami: function () {
+      print([["fg", "  traveler — future explorer of Japan 🗾"], ["fg", ""]]);
+    },
+
+    clear: function () { screen.innerHTML = ""; },
+
+    sudo: function () {
+      print([["red", "  traveler is not in the sudoers file."],
+             ["red", "  This incident will be reported to the shogun."],
+             ["fg", ""]]);
+    },
+
+    konami: function () {
+      print([["magenta", "  🎌 You found a secret! Free imaginary mochi for you."], ["fg", ""]]);
+    }
+  };
+
+  function run(raw) {
+    var trimmed = raw.trim();
+    echoCmd(trimmed);
+    if (!trimmed) { screen.scrollTop = screen.scrollHeight; return; }
+
+    history.push(trimmed);
+    histIdx = history.length;
+
+    var parts = trimmed.split(/\s+/);
+    var name = parts[0].toLowerCase();
+    var args = parts.slice(1).join(" ");
+
+    if (name === "echo") {
+      print([["fg", "  " + args], ["fg", ""]]);
+    } else if (commands[name]) {
+      commands[name]();
+    } else {
+      print([
+        ["red", "  command not found: " + name],
+        ["dim", "  type 'help' to see what I know."],
+        ["fg", ""]
+      ]);
+    }
+    screen.scrollTop = screen.scrollHeight;
+  }
+
+  function submit() {
+    var v = input.value;
+    input.value = "";
+    run(v);
+    // keep the keyboard open on iOS by refocusing synchronously
+    input.focus();
+  }
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); submit(); }
+    else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (histIdx > 0) { histIdx--; input.value = history[histIdx]; }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (histIdx < history.length - 1) { histIdx++; input.value = history[histIdx]; }
+      else { histIdx = history.length; input.value = ""; }
+    }
+  });
+
+  enter.addEventListener("click", submit);
+
+  document.getElementById("quickbar").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    input.value = b.getAttribute("data-cmd");
+    submit();
+  });
+
+  // Tapping the screen area focuses the input (like a real terminal),
+  // but don't steal focus while the user is scrolling or selecting text.
+  var touchMoved = false;
+  screen.addEventListener("touchstart", function () { touchMoved = false; }, { passive: true });
+  screen.addEventListener("touchmove",  function () { touchMoved = true;  }, { passive: true });
+  screen.addEventListener("touchend", function () {
+    if (!touchMoved && !window.getSelection().toString()) input.focus();
+  });
+  screen.addEventListener("click", function () {
+    if (!window.getSelection().toString()) input.focus();
+  });
+
+  // Keep the layout glued to the visual viewport when the iOS keyboard opens.
+  if (window.visualViewport) {
+    var vv = window.visualViewport;
+    function fitViewport() {
+      document.body.style.height = vv.height + "px";
+      window.scrollTo(0, 0);
+      screen.scrollTop = screen.scrollHeight;
+    }
+    vv.addEventListener("resize", fitViewport);
+    vv.addEventListener("scroll", function () { window.scrollTo(0, 0); });
+  }
+
+  print(BANNER);
+})();
+</script>
+</body>
+</html>
