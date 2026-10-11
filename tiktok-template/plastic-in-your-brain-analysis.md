@@ -123,6 +123,9 @@ Use the same style suffix on every prompt so the clips match:
 8. **Thousands of brains:** "Camera pulls back from one pink 3D brain on a grid to reveal thousands of identical brains in perfect rows stretching into the distance, …"
 
 ### 4c. Canva AI assets (1080×1920 overlays, transparent PNG where possible)
+
+**Generated pack (8 pages):** https://www.canva.com/d/DGNzhSLh98WLLer: cover, MICROPLASTICS label, +50%, 7g? DISPUTED, brain fat ≈ plastic, 100× lower, verdict card, follow end card.
+
 1. **Headline card**: screenshot of a news article about the study, cropped, plus a teal highlight bar animated (Wipe) over the key phrase.
 2. **Label kit**: teal (#2EC4C9) rounded box with white "MICROPLASTICS"; red (#E53935) curved arrow.
 3. **Number cards**: "+50%", "7g?", "100× LOWER", "191 BRAINS"; plus a red **"DISPUTED"** stamp: white, extra-bold sans, 220–300 pt, soft drop shadow, "Rise" animation.
