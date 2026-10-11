@@ -1,0 +1,49 @@
+# AutoCine AI Studio - main settings.
+# Every value can be overridden by an environment variable named
+# AUTOCINE_<SECTION>_<KEY> (e.g. AUTOCINE_RENDER_CRF=20), or by the
+# top-level budget variables MAX_PROJECT_BUDGET_USD / ALLOW_PAID_GENERATION.
+
+paths:
+  projects_dir: projects        # per-project working folders + final videos
+  assets_dir: assets            # local music / sfx libraries
+  cache_dir: cache              # content-hash keyed generation cache
+  logs_dir: logs
+  models_dir: models
+  database: projects/autocine.db
+
+execution:
+  mode: hybrid                  # local | cloud | hybrid
+  max_workers: 2                # parallel analysis / generation workers
+  generation_concurrency: 1     # simultaneous generation jobs
+  max_retries: 2                # bounded retries for generation / repair
+  min_free_disk_gb: 5           # refuse to start renders below this
+
+budget:
+  max_project_budget_usd: 0     # 0 = no paid generation at all
+  allow_paid_generation: false  # must be true AND approved per project
+
+render:
+  video_codec: auto             # auto | libx264 | h264_nvenc | h264_qsv | h264_amf
+  crf: 20                       # quality for libx264 (lower = better)
+  preset: medium
+  audio_codec: aac
+  audio_bitrate: 192k
+  pixel_format: yuv420p
+  default_fps: 30
+  loudness_target_lufs: -14     # social/web standard
+
+analysis:
+  scene_threshold: 27.0         # PySceneDetect ContentDetector threshold
+  sample_frames: 12             # frames sampled per clip for heuristics
+  weights:                      # heuristic clip score weights (not artistic judgement)
+    sharpness: 0.35
+    brightness: 0.20
+    motion: 0.25
+    stability: 0.20
+
+planning:
+  backend: rule_based           # rule_based | file  (see docs/PLANNING.md)
+
+ui:
+  host: 127.0.0.1               # local only by default - never 0.0.0.0 unless you mean it
+  port: 7860

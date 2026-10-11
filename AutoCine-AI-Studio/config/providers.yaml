@@ -1,0 +1,26 @@
+# Generation providers. Credentials are NEVER stored here - only the
+# *name* of the environment variable that holds them.
+
+comfyui:
+  enabled: true
+  base_url: http://127.0.0.1:8188
+  # ComfyUI workflows exported with "Save (API Format)". Placeholders such as
+  # {{PROMPT}}, {{NEGATIVE_PROMPT}}, {{WIDTH}}, {{HEIGHT}}, {{FRAMES}},
+  # {{FPS}}, {{SEED}} are substituted at run time. See docs/COMFYUI.md.
+  video_workflow: config/workflows/video_workflow_api.json
+  image_workflow: config/workflows/image_workflow_api.json
+  timeout_seconds: 1800
+  poll_interval_seconds: 3
+  cost_per_second_usd: 0        # local = free (electricity aside)
+
+# Cloud providers are listed for routing/cost estimation only. Their
+# adapters are NOT implemented until their public APIs have been verified
+# against current official documentation (see docs/PROVIDERS.md).
+kling:
+  enabled: false
+  api_key_env: KLING_API_KEY
+  status: unverified
+runway:
+  enabled: false
+  api_key_env: RUNWAYML_API_SECRET
+  status: unverified

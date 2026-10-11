@@ -1,0 +1,16 @@
+# Core (required)
+pydantic>=2.6
+PyYAML>=6.0
+python-dotenv>=1.0
+numpy>=1.26
+Pillow>=10.0
+opencv-python-headless>=4.9
+scenedetect>=0.6.4
+librosa>=0.10
+httpx>=0.27
+gradio>=4.0
+pytest>=8.0
+
+# Optional (install when needed - see README):
+# faster-whisper>=1.0     # speech transcription for subtitles (~150MB+ models)
+# pyttsx3>=2.90           # offline Windows SAPI5 narration
